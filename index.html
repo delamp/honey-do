@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Honey Do</title>
   <!--
-    Honey Do: Rae's list for her husband's Morning Briefing. Installable phone app on GitHub Pages
+    Honey Do: Honey's list for her husband's Morning Briefing. Installable phone app on GitHub Pages
     (outside Google's frame, so it installs properly and the mic works). Data lives in the
     Google Tasks list "Honey Do List" via the Morning Briefing Apps Script web app.
     The secret key is NOT in this file: it comes from the link after "#k=" and is remembered
@@ -191,7 +191,7 @@
   <section class="hero" aria-label="Welcome">
     <img class="art" alt="" width="1100" height="829">
     <div class="copy">
-      <p class="hello" id="hello">Hey, Rae</p>
+      <p class="hello" id="hello">Hey, Honey</p>
       <h1>Honey, could you…</h1>
       <p id="heroLine">Say it once. It's in his ears by sunrise.</p>
     </div>
@@ -237,7 +237,7 @@
 <script>
   // The Morning Briefing web app (Google Apps Script). Useless without the key.
   const API = 'https://script.google.com/macros/s/AKfycbyq4kzNjaUqJTkZN7POLOlyhxYAGpNAWNnLbJjM7HO57_yqSUbbXEyx4cEtPff0r7dN/exec';
-  const NAME = 'Rae';
+  const NAME = 'Honey';
 
   // Key comes from "#k=..." in the link (never sent to GitHub's servers), then is remembered here.
   function readKey() {
@@ -257,9 +257,9 @@
   // Greeting and picture by time of day: breakfast in the morning, the everyday one in the afternoon,
   // sleepy pajamas in the evening and late at night.
   const SCENES = {
-    morning:   { img: 'hero-morning.jpg?v=2', alt: 'Cartoon of Rae and her husband at breakfast in their pajamas', line: 'Coffee first. Then the list.' },
-    afternoon: { img: 'hero.jpg?v=3', alt: 'Cartoon of Rae with her phone and her husband with his coffee and toolbox', line: "Say it once. It's in his ears by sunrise." },
-    night:     { img: 'hero-night.jpg?v=1', alt: 'Cartoon of Rae and her husband sleepy in their pajamas', line: "Add it before bed. He'll hear it by sunrise." },
+    morning:   { img: 'hero-morning.jpg?v=2', alt: 'Cartoon of the couple at breakfast in their pajamas', line: 'Coffee first. Then the list.' },
+    afternoon: { img: 'hero.jpg?v=3', alt: 'Cartoon of her with her phone and her husband with his coffee and toolbox', line: "Say it once. It's in his ears by sunrise." },
+    night:     { img: 'hero-night.jpg?v=1', alt: 'Cartoon of the couple sleepy in their pajamas', line: "Add it before bed. He'll hear it by sunrise." },
   };
   function applyTimeOfDay() {
     const h = new Date().getHours();

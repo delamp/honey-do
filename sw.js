@@ -1,6 +1,6 @@
 // Offline helper for the Honey Do app. It only keeps a copy of the page itself so the
 // app opens without a connection; the list always comes live from Google Tasks.
-const CACHE = 'honey-do-v6';
+const CACHE = 'honey-do-v7';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
   './hero.jpg?v=3', './hero-morning.jpg?v=2', './hero-night.jpg?v=1'];
 
