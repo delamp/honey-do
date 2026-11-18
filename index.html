@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Honey Do</title>
   <!--
-    Honey Do: Rae's list for B Cook's Morning Briefing. Installable phone app on GitHub Pages
+    Honey Do: Rae's list for her husband's Morning Briefing. Installable phone app on GitHub Pages
     (outside Google's frame, so it installs properly and the mic works). Data lives in the
     Google Tasks list "Honey Do List" via the Morning Briefing Apps Script web app.
     The secret key is NOT in this file: it comes from the link after "#k=" and is remembered
@@ -224,7 +224,7 @@
     <div class="how">
       <strong>How it works</strong>
       <ol>
-        <li>Anything you add lands on B Cook's Morning Briefing, the podcast that's ready for him around 6:30 AM on weekdays and 8:30 AM on weekends. Add things before 6 AM (8 AM on Saturday and Sunday) to make the next one.</li>
+        <li>Anything you add lands on his Morning Briefing, the podcast that's ready for him around 6:30 AM on weekdays and 8:30 AM on weekends. Add things before 6 AM (8 AM on Saturday and Sunday) to make the next one.</li>
         <li>New items get a proper mention the next morning. After that, a quick reminder each day until it's done.</li>
         <li>Tap the honeycomb when it's handled.</li>
       </ol>
@@ -257,9 +257,9 @@
   // Greeting and picture by time of day: breakfast in the morning, the everyday one in the afternoon,
   // sleepy pajamas in the evening and late at night.
   const SCENES = {
-    morning:   { img: 'hero-morning.jpg?v=2', alt: 'Cartoon of Rae and B Cook at breakfast in their pajamas', line: 'Coffee first. Then the list.' },
-    afternoon: { img: 'hero.jpg?v=3', alt: 'Cartoon of Rae with her phone and B Cook with his coffee and toolbox', line: "Say it once. It's in his ears by sunrise." },
-    night:     { img: 'hero-night.jpg?v=1', alt: 'Cartoon of Rae and B Cook sleepy in their pajamas', line: "Add it before bed. He'll hear it by sunrise." },
+    morning:   { img: 'hero-morning.jpg?v=2', alt: 'Cartoon of Rae and her husband at breakfast in their pajamas', line: 'Coffee first. Then the list.' },
+    afternoon: { img: 'hero.jpg?v=3', alt: 'Cartoon of Rae with her phone and her husband with his coffee and toolbox', line: "Say it once. It's in his ears by sunrise." },
+    night:     { img: 'hero-night.jpg?v=1', alt: 'Cartoon of Rae and her husband sleepy in their pajamas', line: "Add it before bed. He'll hear it by sunrise." },
   };
   function applyTimeOfDay() {
     const h = new Date().getHours();

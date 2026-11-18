@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Honey Do",
   "short_name": "Honey Do",
-  "description": "Honey, could you… Add it here and it's on B Cook's Morning Briefing by sunrise.",
+  "description": "Honey, could you… Add it here and it's on his Morning Briefing by sunrise.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
