@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Honey Do">
+  <meta name="theme-color" content="#FFF8EC" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1A110C" media="(prefers-color-scheme: dark)">
+  <meta name="robots" content="noindex">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Honey Do</title>
+  <!--
+    Honey Do: Rae's list for B Cook's Morning Briefing. Installable phone app on GitHub Pages
+    (outside Google's frame, so it installs properly and the mic works). Data lives in the
+    Google Tasks list "Honey Do List" via the Morning Briefing Apps Script web app.
+    The secret key is NOT in this file: it comes from the link after "#k=" and is remembered
+    on this phone only. That key only opens the Honey Do List.
+  -->
+  <style>
+    :root {
+      --bg: #FFF8EC; --bg2: #FDEFD6; --card: #FFFFFF; --ink: #2B1810; --ink2: #6E5646; --muted: #9A8373;
+      --line: #F0E2CC; --honey: #E3A12F; --honey-deep: #B9741A; --honey-soft: #FCE7BF; --cocoa: #2B1810;
+      --hot: #D2552C; --hot-soft: #FBE1D6; --ok: #3E8E5E; --shadow: 0 1px 2px rgba(43,24,16,.06), 0 8px 24px rgba(43,24,16,.08);
+      --radius: 22px; --serif: "Fraunces", Georgia, serif; --sans: "Inter", -apple-system, Roboto, "Segoe UI", sans-serif;
+      --hex: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0% 50%);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1A110C; --bg2: #22160F; --card: #261911; --ink: #FBEFDD; --ink2: #D7C2A8; --muted: #9C8571;
+        --line: #3A281C; --honey: #F2B347; --honey-deep: #E39A2A; --honey-soft: #3E2A14; --cocoa: #120B07;
+        --hot: #F07A4E; --hot-soft: #3F1F14; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+      }
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { background: var(--bg); }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+    button, input, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    .wrap { max-width: 560px; margin: 0 auto; padding: 0 18px calc(40px + env(safe-area-inset-bottom)); }
+
+    /* ---------- Top bar ---------- */
+    header.top { display: flex; align-items: center; gap: 10px; padding: calc(14px + env(safe-area-inset-top)) 0 6px; }
+    .mark { width: 34px; height: 34px; flex: none; }
+    .brand { font-family: var(--serif); font-weight: 700; font-size: 22px; letter-spacing: -.01em; }
+    .brand em { font-style: normal; color: var(--honey-deep); }
+    .count-pill { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--ink2); background: var(--card);
+                  border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; box-shadow: var(--shadow); }
+
+    /* ---------- Hero ---------- */
+    .hero { position: relative; margin: 14px 0 18px; border-radius: 28px; overflow: hidden; color: #2B1810;
+            background: linear-gradient(180deg, #F6C46B 0%, #E9A93A 100%); box-shadow: var(--shadow); }
+    .hero .art { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: 50% 28%; background: #F7E9D2; }
+    .hero .copy { position: relative; padding: 18px 22px 22px; }
+    .hero .copy::before { content: ""; position: absolute; left: 0; right: 0; top: -44px; height: 44px;
+                          background: linear-gradient(180deg, rgba(246,196,107,0) 0%, #F6C46B 100%); pointer-events: none; }
+    .hello { font-size: 12.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; opacity: .7; margin: 0 0 6px; }
+    .hero h1 { font-family: var(--serif); font-weight: 600; font-size: 32px; line-height: 1.05; letter-spacing: -.02em; margin: 0 0 8px; }
+    .hero p { margin: 0; font-size: 15px; line-height: 1.4; opacity: .82; }
+    .hero.compact .art { aspect-ratio: 16 / 7; object-position: 50% 22%; }
+
+    /* ---------- Composer ---------- */
+    .composer { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+    .composer label.lead { display: block; font-family: var(--serif); font-weight: 600; font-size: 19px; margin: 2px 2px 10px; }
+    textarea { width: 100%; min-height: 96px; resize: none; border: 0; outline: 0; background: var(--bg2); border-radius: 16px;
+               padding: 14px 16px; font-size: 17px; line-height: 1.45; transition: box-shadow .2s, background .2s; }
+    textarea:focus { box-shadow: 0 0 0 2px var(--honey); background: transparent; }
+    textarea::placeholder { color: var(--muted); }
+    .tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line);
+            background: transparent; font-size: 14px; font-weight: 600; color: var(--ink2); transition: all .18s; position: relative; }
+    .chip svg { width: 16px; height: 16px; }
+    .chip[aria-pressed="true"].hot { background: var(--hot-soft); border-color: var(--hot); color: var(--hot); }
+    .chip.has-date { background: var(--honey-soft); border-color: var(--honey); color: var(--ink); }
+    .chip input[type=date] { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
+    .chip .x { margin-left: 2px; opacity: .6; font-size: 16px; line-height: 1; display: none; }
+    .chip.has-date .x { display: inline; }
+    .actions { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+    .mic { position: relative; width: 56px; height: 56px; flex: none; border: 0; border-radius: 50%; background: var(--honey-soft); color: var(--honey-deep);
+           display: grid; place-items: center; transition: transform .15s, background .2s, color .2s; }
+    .mic svg { width: 24px; height: 24px; }
+    .mic:active { transform: scale(.94); }
+    .mic.on { background: var(--hot); color: #fff; }
+    .mic.on::before, .mic.on::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--hot); animation: ring 1.6s ease-out infinite; }
+    .mic.on::after { animation-delay: .8s; }
+    @keyframes ring { from { transform: scale(1); opacity: .7; } to { transform: scale(1.7); opacity: 0; } }
+    .send { flex: 1; height: 56px; border: 0; border-radius: 18px; background: var(--cocoa); color: #FFF4E2; font-weight: 700; font-size: 16px;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: transform .15s, opacity .2s; }
+    @media (prefers-color-scheme: dark) { .send { background: var(--honey); color: #241509; } }
+    .send:active { transform: scale(.98); }
+    .send:disabled { opacity: .55; }
+    .send svg { width: 18px; height: 18px; }
+    .voice-hint { font-size: 13px; color: var(--muted); margin: 10px 4px 0; min-height: 1em; }
+    .voice-hint.err { color: var(--hot); }
+
+    /* ---------- List ---------- */
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; margin: 30px 4px 12px; }
+    .section-head h2 { font-family: var(--serif); font-weight: 600; font-size: 22px; margin: 0; letter-spacing: -.01em; }
+    .section-head span { font-size: 13px; color: var(--muted); font-weight: 500; }
+    ul.items { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    li.item { display: flex; gap: 14px; align-items: flex-start; background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+              padding: 14px 14px 14px 12px; box-shadow: 0 1px 2px rgba(43,24,16,.04); transition: opacity .35s, transform .35s, max-height .35s, margin .35s, padding .35s;
+              animation: rise .35s ease both; }
+    li.item.urgent { border-color: color-mix(in srgb, var(--hot) 45%, var(--line)); box-shadow: inset 4px 0 0 var(--hot); }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .hexbtn { width: 34px; height: 34px; flex: none; border: 0; padding: 0; background: transparent; position: relative; margin-top: 1px; }
+    .hexbtn::before { content: ""; position: absolute; inset: 0; clip-path: var(--hex); background: var(--honey); }
+    .hexbtn::after { content: ""; position: absolute; inset: 2.5px; clip-path: var(--hex); background: var(--card); transition: background .2s; }
+    .hexbtn svg { position: absolute; inset: 0; margin: auto; width: 18px; height: 18px; z-index: 1; color: var(--cocoa); opacity: 0; transform: scale(.4); transition: all .25s cubic-bezier(.3,1.6,.5,1); }
+    li.checked .hexbtn::after { background: var(--honey); }
+    li.checked .hexbtn svg { opacity: 1; transform: none; }
+    li.checked .title { text-decoration: line-through; text-decoration-color: var(--honey); color: var(--muted); }
+    li.leaving { opacity: 0; transform: translateX(24px); }
+    .body { flex: 1; min-width: 0; }
+    .title { font-size: 16.5px; font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; transition: color .2s; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: var(--bg2); color: var(--ink2); }
+    .tag svg { width: 13px; height: 13px; }
+    .tag.hot { background: var(--hot-soft); color: var(--hot); }
+    .tag.date { background: var(--honey-soft); color: var(--ink); }
+    .tag.heard { color: var(--ok); }
+
+    .empty { text-align: center; padding: 30px 20px 10px; color: var(--ink2); }
+    .empty .em-art { width: 92px; height: 92px; margin: 0 auto 12px; }
+    .empty h3 { font-family: var(--serif); font-weight: 600; font-size: 20px; margin: 0 0 4px; color: var(--ink); }
+    .empty p { margin: 0; font-size: 14px; }
+    .skeleton { height: 70px; border-radius: 18px; background: linear-gradient(90deg, var(--bg2) 0%, var(--card) 50%, var(--bg2) 100%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+    .how { margin: 28px 4px 0; padding: 16px 18px; border-radius: 18px; background: var(--bg2); color: var(--ink2); font-size: 13.5px; line-height: 1.5; }
+    .how strong { color: var(--ink); }
+    .how ol { margin: 8px 0 0; padding-left: 18px; }
+    .how li { margin: 3px 0; }
+
+    #setup { display: none; margin-top: 18px; }
+
+    /* ---------- Toast ---------- */
+    .toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+             display: flex; align-items: center; gap: 14px; max-width: calc(100% - 32px); background: var(--cocoa); color: #FFF4E2;
+             padding: 12px 14px 12px 18px; border-radius: 16px; font-size: 14.5px; font-weight: 500; box-shadow: 0 12px 30px rgba(0,0,0,.25);
+             transition: all .28s cubic-bezier(.2,.9,.3,1.2); z-index: 10; }
+    @media (prefers-color-scheme: dark) { .toast { background: #FBEFDD; color: #241509; } }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+    .toast button { border: 0; background: transparent; color: var(--honey); font-weight: 700; padding: 4px 6px; }
+    @media (prefers-color-scheme: dark) { .toast button { color: var(--honey-deep); } }
+
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+    @media (max-width: 400px) { .hero h1 { font-size: 29px; } .chip { padding: 0 12px; font-size: 13.5px; } }
+  </style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.5c.6 3.2 4.5 5.6 4.5 10a4.5 4.5 0 0 1-9 0c0-1.8.7-3.2 1.7-4.3.2 1.6 1 2.6 2 3 0-3.4-.6-5.9.8-8.7z" fill="currentColor"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></g></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5 10.5a7 7 0 0 0 14 0M12 17.5v4"/></g></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2.5" fill="currentColor"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-phones" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3.5" y="14" width="4.5" height="6.5" rx="1.8"/><rect x="16" y="14" width="4.5" height="6.5" rx="1.8"/></g></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 18h16M7 18a5 5 0 0 1 10 0M12 6v2.5M5.6 9.6l1.7 1.7M18.4 9.6l-1.7 1.7"/></g></symbol>
+    <symbol id="mark" viewBox="0 0 64 64">
+      <path d="M18 6h28l14 25-14 25H18L4 31z" fill="#E3A12F"/>
+      <path d="M18 6h28l14 25-14 25H18L4 31z" fill="none" stroke="#B9741A" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M38 56c0 4 2.2 6.5 4 6.5s4-2.5 4-6.5V54h-8z" fill="#E3A12F"/>
+      <path d="M21 31.5l7.5 7.5L44 23.5" fill="none" stroke="#2B1810" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <svg class="mark" aria-hidden="true"><use href="#mark"/></svg>
+    <div class="brand">Honey <em>Do</em></div>
+    <div class="count-pill" id="countPill" hidden></div>
+  </header>
+
+  <section class="hero" aria-label="Welcome">
+    <img class="art" src="hero.jpg?v=3" alt="Cartoon of Rae with her phone and B Cook with his coffee and toolbox" width="1100" height="829">
+    <div class="copy">
+      <p class="hello" id="hello">Hey, Rae</p>
+      <h1>Honey, could you…</h1>
+      <p>Say it once. It's in his ears by sunrise.</p>
+    </div>
+  </section>
+
+  <div id="setup" class="composer">
+    <label class="lead">One more step</label>
+    <p style="margin:0;color:var(--ink2)">Open the private Honey Do link (the one that ends in <code>#k=…</code>) once on this phone. It'll be remembered after that.</p>
+  </div>
+
+  <main id="app">
+    <section class="composer" aria-label="Add to his list">
+      <label class="lead" for="text">What does he need to handle?</label>
+      <textarea id="text" rows="3" placeholder="Call the plumber about the upstairs sink…" enterkeyhint="done"></textarea>
+      <div class="tools">
+        <button class="chip hot" id="urgent" type="button" aria-pressed="false"><svg><use href="#i-flame"/></svg>Needs it today</button>
+        <span class="chip" id="dateChip"><svg><use href="#i-cal"/></svg><span id="dateLabel">Due date</span><span class="x" id="dateClear" aria-label="Clear date">×</span>
+          <input type="date" id="date" aria-label="Needs doing by"></span>
+      </div>
+      <div class="actions">
+        <button class="mic" id="mic" type="button" aria-label="Speak it"><svg id="micIcon"><use href="#i-mic"/></svg></button>
+        <button class="send" id="add" type="button"><span id="addLabel">Add to his list</span><svg><use href="#i-send"/></svg></button>
+      </div>
+      <p class="voice-hint" id="voice">Tap the mic and just say it.</p>
+    </section>
+
+    <div class="section-head"><h2>On his list</h2><span id="sub"></span></div>
+    <ul class="items" id="items"><li class="skeleton"></li><li class="skeleton"></li></ul>
+
+    <div class="how">
+      <strong>How it works</strong>
+      <ol>
+        <li>Anything you add lands on B Cook's Morning Briefing, the podcast that plays for him around 5 AM.</li>
+        <li>New items get a proper mention the next morning. After that, a quick reminder each day until it's done.</li>
+        <li>Tap the honeycomb when it's handled.</li>
+      </ol>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button id="toastBtn" type="button" hidden>Undo</button></div>
+
+<script>
+  // The Morning Briefing web app (Google Apps Script). Useless without the key.
+  const API = 'https://script.google.com/macros/s/AKfycbyq4kzNjaUqJTkZN7POLOlyhxYAGpNAWNnLbJjM7HO57_yqSUbbXEyx4cEtPff0r7dN/exec';
+  const NAME = 'Rae';
+
+  // Key comes from "#k=..." in the link (never sent to GitHub's servers), then is remembered here.
+  function readKey() {
+    const fromHash = new URLSearchParams(location.hash.slice(1)).get('k');
+    try {
+      if (fromHash) localStorage.setItem('honeyKey', fromHash);
+      return fromHash || localStorage.getItem('honeyKey');
+    } catch (e) { return fromHash; }
+  }
+  const KEY = readKey();
+  if (KEY && location.hash) history.replaceState(null, '', location.pathname); // keep the key out of the address bar
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; };
+  const buzz = (ms) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+
+  // Greeting by time of day
+  (function () {
+    const h = new Date().getHours();
+    $('hello').textContent = (h < 5 ? 'Late night, ' : h < 12 ? 'Good morning, ' : h < 17 ? 'Good afternoon, ' : 'Good evening, ') + NAME;
+  })();
+
+  // ---- Toast with optional action ----
+  let toastTimer = null;
+  function toast(msg, actionLabel, onAction, ms) {
+    $('toastMsg').textContent = msg;
+    const b = $('toastBtn');
+    b.hidden = !actionLabel;
+    b.textContent = actionLabel || '';
+    b.onclick = () => { hideToast(); onAction && onAction(); };
+    $('toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, ms || 2800);
+  }
+  function hideToast() { $('toast').classList.remove('show'); }
+
+  // ---- API: one request at a time so quick taps land in order ----
+  let queue = Promise.resolve();
+  function api(params) {
+    const q = new URLSearchParams(Object.assign({ k: KEY }, params));
+    const run = () => fetch(API + '?' + q.toString(), { redirect: 'follow' })
+      .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then((t) => {
+        if (t.trim() === 'Not authorized') throw new Error('auth');
+        const r = JSON.parse(t);
+        if (!r.ok) throw new Error(r.error || 'Something went wrong.');
+        return r;
+      });
+    const p = queue.then(run, run);
+    queue = p.catch(() => {});
+    return p;
+  }
+  function errText(e) {
+    if (e && e.message === 'auth') return 'That link’s key is off. Open the full link again.';
+    if (e && /HTTP|fetch|NetworkError|Load failed/i.test(e.message)) return "Can't reach the list right now. Check your connection.";
+    return (e && e.message) || "Can't reach the list right now.";
+  }
+
+  // ---- List ----
+  let items = [];
+  const pending = new Map(); // id -> timer, for the "Undo" grace period before an item is really marked done
+
+  function render() {
+    const visible = items.filter((it) => !it._gone);
+    const urgent = visible.filter((it) => it.urgent).length;
+    $('countPill').hidden = !visible.length;
+    $('countPill').textContent = visible.length + (visible.length === 1 ? ' thing' : ' things');
+    $('sub').textContent = visible.length ? (urgent ? urgent + ' for today' : 'Tap a honeycomb when it’s done') : '';
+    const ul = $('items');
+    if (!visible.length) {
+      ul.innerHTML = '<li class="empty"><svg class="em-art" viewBox="0 0 64 64" aria-hidden="true"><use href="#mark"/></svg>' +
+        '<h3>His list is clear</h3><p>Enjoy it while it lasts.</p></li>';
+      return;
+    }
+    // Urgent first, then soonest date, then newest.
+    visible.sort((a, b) => (b.urgent - a.urgent) || ((a.due || '9') < (b.due || '9') ? -1 : (a.due || '9') > (b.due || '9') ? 1 : 0));
+    ul.innerHTML = visible.map((it) => {
+      const tags = [];
+      if (it.urgent) tags.push('<span class="tag hot"><svg><use href="#i-flame"/></svg>Today</span>');
+      if (it.date) tags.push('<span class="tag date"><svg><use href="#i-cal"/></svg>By ' + esc(it.date) + '</span>');
+      tags.push(it.mentioned
+        ? '<span class="tag heard"><svg><use href="#i-phones"/></svg>He’s heard it</span>'
+        : '<span class="tag"><svg><use href="#i-sun"/></svg>On tomorrow’s show</span>');
+      return '<li class="item' + (it.urgent ? ' urgent' : '') + (pending.has(it.id) ? ' checked' : '') + '" data-id="' + esc(it.id) + '">' +
+        '<button class="hexbtn" type="button" aria-label="Mark done: ' + esc(it.title) + '"><svg><use href="#i-check"/></svg></button>' +
+        '<div class="body"><div class="title">' + esc(it.title) + '</div><div class="meta">' + tags.join('') + '</div></div></li>';
+    }).join('');
+    ul.querySelectorAll('li.item').forEach((li) => {
+      li.querySelector('.hexbtn').onclick = () => toggleDone(li.getAttribute('data-id'), li);
+    });
+  }
+
+  function setItems(list) {
+    items = (list || []).map((it) => Object.assign({}, it, { due: it.date ? it.date : '' }));
+    render();
+  }
+
+  function toggleDone(id, li) {
+    if (pending.has(id)) { // tapped again during the grace period: undo
+      clearTimeout(pending.get(id)); pending.delete(id); li.classList.remove('checked'); hideToast(); return;
+    }
+    buzz(12);
+    li.classList.add('checked');
+    const it = items.find((x) => x.id === id);
+    const timer = setTimeout(() => commitDone(id, li), 3500);
+    pending.set(id, timer);
+    toast('Nice. “' + (it ? it.title : 'Item') + '” is done.', 'Undo', () => {
+      clearTimeout(timer); pending.delete(id); li.classList.remove('checked');
+    }, 3400);
+  }
+
+  function commitDone(id, li) {
+    pending.delete(id);
+    li.classList.add('leaving');
+    const it = items.find((x) => x.id === id); if (it) it._gone = true;
+    setTimeout(render, 350);
+    api({ action: 'done', id }).then((r) => { if (!pending.size) setItems(r.items); })
+      .catch((e) => { if (it) it._gone = false; render(); toast(errText(e)); });
+  }
+
+  function refresh() {
+    if (pending.size) return; // don't redraw under her thumb
+    return api({ action: 'list' }).then((r) => setItems(r.items)).catch((e) => {
+      if (!items.length) $('items').innerHTML = '<li class="empty"><h3>Can’t reach the list</h3><p>' + esc(errText(e)) + '</p></li>';
+      else toast(errText(e));
+    });
+  }
+
+  // ---- Composer ----
+  const urgentBtn = $('urgent');
+  urgentBtn.onclick = () => { const on = urgentBtn.getAttribute('aria-pressed') !== 'true'; urgentBtn.setAttribute('aria-pressed', on); buzz(8); };
+
+  const dateInput = $('date');
+  function prettyDate(v) { const p = v.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); }
+  function syncDate() {
+    $('dateChip').classList.toggle('has-date', !!dateInput.value);
+    $('dateLabel').textContent = dateInput.value ? 'By ' + prettyDate(dateInput.value) : 'Due date';
+  }
+  dateInput.onchange = syncDate;
+  $('dateClear').onclick = (e) => { e.preventDefault(); e.stopPropagation(); dateInput.value = ''; syncDate(); };
+
+  const text = $('text');
+  text.addEventListener('input', () => { text.style.height = 'auto'; text.style.height = Math.max(96, text.scrollHeight) + 'px'; });
+
+  $('add').onclick = () => {
+    const value = text.value.trim();
+    if (!value) { text.focus(); toast('Say it or type it first.'); return; }
+    const btn = $('add');
+    btn.disabled = true; $('addLabel').textContent = 'Adding…';
+    const params = { action: 'add', text: value };
+    if (urgentBtn.getAttribute('aria-pressed') === 'true') params.urgent = '1';
+    if (dateInput.value) params.date = dateInput.value;
+    api(params).then((r) => {
+      text.value = ''; text.style.height = ''; urgentBtn.setAttribute('aria-pressed', 'false'); dateInput.value = ''; syncDate();
+      buzz([10, 40, 10]);
+      toast('Added. He’ll hear about it in the morning.');
+      setItems(r.items);
+      $('voice').textContent = 'Tap the mic and just say it.'; $('voice').classList.remove('err');
+    }).catch((e) => toast(errText(e)))
+      .then(() => { btn.disabled = false; $('addLabel').textContent = 'Add to his list'; });
+  };
+
+  // ---- Voice: what she says goes into the box, so she can check it before adding ----
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const mic = $('mic');
+  let listening = null;
+  function voiceHint(msg, isErr) { $('voice').textContent = msg; $('voice').classList.toggle('err', !!isErr); }
+  function micIcon(id) { $('micIcon').innerHTML = '<use href="#' + id + '"/>'; }
+
+  mic.onclick = () => {
+    if (listening) { listening.stop(); return; }
+    if (!Recognition) { voiceHint("This phone can't listen here. Tap the box and use your keyboard's mic.", true); text.focus(); return; }
+    const rec = new Recognition();
+    rec.lang = navigator.language || 'en-US';
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    const before = text.value.trim();
+    rec.onstart = () => { listening = rec; mic.classList.add('on'); micIcon('i-stop'); voiceHint('Listening… go ahead.'); buzz(10); };
+    rec.onend = () => { listening = null; mic.classList.remove('on'); micIcon('i-mic'); };
+    rec.onerror = (e) => {
+      if (e.error === 'no-speech' || e.error === 'aborted') { voiceHint("Didn't catch anything. Tap the mic and try again."); return; }
+      voiceHint(e.error === 'not-allowed' || e.error === 'service-not-allowed'
+        ? 'The mic is blocked for this app. Allow it in your phone settings, or use the keyboard mic.'
+        : "Didn't catch that. Try again.", true);
+    };
+    rec.onresult = (e) => {
+      let said = '';
+      for (let i = 0; i < e.results.length; i++) said += e.results[i][0].transcript;
+      said = said.trim();
+      if (said) said = said.charAt(0).toUpperCase() + said.slice(1);
+      text.value = (before ? before + ' ' : '') + said;
+      text.dispatchEvent(new Event('input'));
+      if (e.results[e.results.length - 1].isFinal) voiceHint('Got it. Give it a look, then add it.');
+    };
+    try { rec.start(); } catch (err) { voiceHint("Couldn't start the mic. Use the keyboard's mic instead.", true); }
+  };
+
+  // Lets the phone install this as an app and open it without a connection.
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+  // ---- Start ----
+  if (!KEY) {
+    $('app').style.display = 'none';
+    $('setup').style.display = 'block';
+  } else {
+    refresh();
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  }
+</script>
+</body>
+</html>
